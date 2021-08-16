@@ -10,11 +10,11 @@ type hub struct {
 	rooms map[string]map[*connection]bool
 
 	// Inbound messages from the connections.
-	broadcast chan Message
+	send chan Message
 
 	// Register requests from the connections.
-	register chan subscription
+	join chan subscription
 
 	// Unregister requests from connections.
-	unregister chan subscription
+	leave chan subscription
 }
