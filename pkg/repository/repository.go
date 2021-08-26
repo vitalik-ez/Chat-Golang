@@ -7,9 +7,11 @@ import (
 
 type Authorization interface {
 	CreateUser(user entity.User) (int, error)
+	GetUser(email, password string) (entity.User, error)
 }
 
 type Room interface {
+	Create(userId uint64, room entity.Room) (uint64, error)
 }
 
 type Message interface {
@@ -24,5 +26,6 @@ type Repository struct {
 func NewRepository(db *sqlx.DB) *Repository {
 	return &Repository{
 		Authorization: NewAuthPostgres(db),
+		Room:          NewRoomPostgres(db),
 	}
 }

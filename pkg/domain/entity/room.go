@@ -2,6 +2,6 @@ package entity
 
 type Room struct {
 	ID    uint64
-	Name  string
+	Name  string `json:"name" binding:"required"`
 	Users []*User
 }
