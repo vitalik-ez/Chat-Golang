@@ -7,7 +7,7 @@ import (
 
 type Authorization interface {
 	CreateUser(user entity.User) (int, error)
-	GenerateToken(email, password string) (string, error)
+	GenerateToken(email, password string) (string, string, error)
 	ParseToken(accessToken string) (uint64, error)
 }
 

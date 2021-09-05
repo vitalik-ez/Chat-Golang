@@ -7,7 +7,8 @@ CREATE TABLE IF NOT EXISTS users (
 
 CREATE TABLE IF NOT EXISTS rooms (
     id serial not null UNIQUE,
-    name varchar(255) not null
+    name varchar(255) not null,
+    founder_id int REFERENCES users(id) on DELETE CASCADE not NULL
 );
 
 CREATE TABLE IF NOT EXISTS users_rooms (

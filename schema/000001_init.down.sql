@@ -1,7 +1,7 @@
-DROP TABLE users_rooms;
+DROP TABLE IF EXISTS users_rooms;
 
-DROP TABLE messages;
+DROP TABLE IF EXISTS messages;
 
-DROP TABLE users;
+DROP TABLE IF EXISTS users;
 
-DROP TABLE rooms;
+DROP TABLE IF EXISTS rooms;
