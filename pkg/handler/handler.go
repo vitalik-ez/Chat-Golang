@@ -17,14 +17,14 @@ func (h *Handler) InitRoutes() *gin.Engine {
 
 	router := gin.New()
 
-	auth := router.Group("/auth")
 	{
+		auth := router.Group("/auth")
 		auth.POST("/sign-up", h.signUp)
 		auth.POST("/sign-in", h.signIn)
 	}
 
-	api := router.Group("/api", h.userIdentity)
 	{
+		api := router.Group("/api", h.userIdentity)
 		room := api.Group("/room")
 		{
 			room.GET("/", h.getAllRooms)
