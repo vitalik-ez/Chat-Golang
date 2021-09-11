@@ -1,15 +1,21 @@
 package handler
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/vitalik-ez/Chat-Golang/pkg/domain/entity"
+)
 
 type message struct {
 	data []byte
 	room string
 }
 
-type subscription struct {
-	conn *connection
-	room string
+type session struct {
+	conn     *connection
+	commands *HubCommand
+
+	//room string
 }
 
 // hub maintains the set of active connections and broadcasts messages to the
@@ -19,54 +25,59 @@ type hub struct {
 	rooms map[string]map[*connection]bool
 
 	// Inbound messages from the connections.
-	broadcast chan message
+	broadcast chan entity.Message
 
 	// Register requests from the connections.
-	register chan subscription
+	join chan session
 
 	// Unregister requests from connections.
-	unregister chan subscription
+	leave chan session
 }
 
 var Hb = hub{
-	broadcast:  make(chan message),
-	register:   make(chan subscription),
-	unregister: make(chan subscription),
-	rooms:      make(map[string]map[*connection]bool),
+	broadcast: make(chan entity.Message),
+	join:      make(chan session),
+	leave:     make(chan session),
+	rooms:     make(map[string]map[*connection]bool),
 }
 
 func (h *hub) Run() {
 	for {
 		select {
-		case s := <-h.register:
-			connections := h.rooms[s.room]
+		case s := <-h.join:
+			fmt.Println("JOin", s.commands.Data)
+			connections := h.rooms[s.commands.Data]
 			if connections == nil {
 				connections = make(map[*connection]bool)
-				h.rooms[s.room] = connections
+				h.rooms[s.commands.Data] = connections
 			}
-			h.rooms[s.room][s.conn] = true
-		case s := <-h.unregister:
-			connections := h.rooms[s.room]
-			if connections != nil {
-				if _, ok := connections[s.conn]; ok {
-					delete(connections, s.conn)
-					close(s.conn.send)
-					if len(connections) == 0 {
-						delete(h.rooms, s.room)
-					}
+			h.rooms[s.commands.Data][s.conn] = true
+			fmt.Println("check ", h.rooms)
+		/*case s := <-h.leave:
+		connections := h.rooms[s.room]
+		if connections != nil {
+			if _, ok := connections[s.conn]; ok {
+				delete(connections, s.conn)
+				close(s.conn.send)
+				if len(connections) == 0 {
+					delete(h.rooms, s.room)
 				}
 			}
+		}*/
 		case m := <-h.broadcast:
-			connections := h.rooms[m.room]
-			fmt.Println("connections ", connections)
+			connections := h.rooms[m.Room]
+			fmt.Println("Room", m.Room, "connections", connections)
+			db[m.Room] = append(db[m.Room], m)
+			fmt.Println("broadcast", m)
 			for c := range connections {
+				fmt.Println("c", c)
 				select {
-				case c.send <- m.data:
+				case c.send <- m:
 				default:
 					close(c.send)
 					delete(connections, c)
 					if len(connections) == 0 {
-						delete(h.rooms, m.room)
+						delete(h.rooms, m.Room)
 					}
 				}
 			}

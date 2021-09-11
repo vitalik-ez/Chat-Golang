@@ -1,5 +1,7 @@
 package entity
 
+import "time"
+
 /*
 type Message struct {
 	ID        uint64
@@ -11,7 +13,8 @@ type Message struct {
 */
 
 type Message struct {
-	/*Email    string `json:"email"`
-	Username string `json:"username"`*/
-	Text string `json:"text"`
+	Room     string    `json:"room"`
+	Author   string    `json:"author"`
+	Text     string    `json:"text"`
+	CreateAt time.Time `json:"time"`
 }

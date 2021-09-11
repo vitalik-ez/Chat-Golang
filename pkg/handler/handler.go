@@ -29,8 +29,8 @@ func (h *Handler) InitRoutes() *gin.Engine {
 		{
 			room.GET("/", h.getAllRooms)
 			room.POST("/", h.createRoom)
-			room.GET("/:roomId", h.chatRoom)
-			room.GET("/ws/:roomId", h.chatRoomWS)
+			//room.GET("/:roomId", h.chatRoom)
+			room.GET("/ws/", h.chatRoomWS)
 		}
 	}
 

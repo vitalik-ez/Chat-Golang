@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/vitalik-ez/Chat-Golang/pkg/domain/entity"
@@ -25,6 +26,16 @@ func (h *Handler) createRoom(c *gin.Context) {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
 	}
+
+	// tmp
+	messageTmp := entity.Message{
+		Room:     input.Name,
+		Text:     "Create room",
+		Author:   "default",
+		CreateAt: time.Now(),
+	}
+	db[input.Name] = append(db[input.Name], messageTmp)
+
 	c.JSON(http.StatusOK, map[string]interface{}{
 		"id": id,
 	})

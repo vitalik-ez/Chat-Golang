@@ -8,7 +8,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"github.com/vitalik-ez/Chat-Golang/pkg/domain/entity"
 )
+
+// key is name of the room, value is a list save messages
+var db = make(map[string][]entity.Message)
 
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
@@ -27,6 +31,8 @@ const (
 
 	// Maximum message size allowed from peer.
 	maxMessageSize = 512
+
+	join = "join"
 )
 
 // connection is an middleman between the websocket connection and the hub.
@@ -35,29 +41,30 @@ type connection struct {
 	ws *websocket.Conn
 
 	// Buffered channel of outbound messages.
-	send chan []byte
+	send chan entity.Message
 }
 
 // readPump pumps messages from the websocket connection to the hub.
-func (s subscription) readPump() {
+func (s session) readPump() {
 	c := s.conn
 	defer func() {
-		Hb.unregister <- s
+		Hb.leave <- s
 		c.ws.Close()
 	}()
 	c.ws.SetReadLimit(maxMessageSize)
 	c.ws.SetReadDeadline(time.Now().Add(pongWait))
 	c.ws.SetPongHandler(func(string) error { c.ws.SetReadDeadline(time.Now().Add(pongWait)); return nil })
 	for {
-		_, msg, err := c.ws.ReadMessage()
+		message := entity.Message{}
+		err := c.ws.ReadJSON(&message)
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway) {
 				log.Printf("error: %v", err)
 			}
 			break
 		}
-		m := message{msg, s.room}
-		Hb.broadcast <- m
+		fmt.Println("message do broadcast", message)
+		Hb.broadcast <- message
 	}
 }
 
@@ -68,7 +75,7 @@ func (c *connection) write(mt int, payload []byte) error {
 }
 
 // writePump pumps messages from the hub to the websocket connection.
-func (s *subscription) writePump() {
+func (s *session) writePump() {
 	c := s.conn
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
@@ -82,7 +89,7 @@ func (s *subscription) writePump() {
 				c.write(websocket.CloseMessage, []byte{})
 				return
 			}
-			if err := c.write(websocket.TextMessage, message); err != nil {
+			if err := c.ws.WriteJSON(message); err != nil {
 				return
 			}
 		case <-ticker.C:
@@ -93,9 +100,19 @@ func (s *subscription) writePump() {
 	}
 }
 
+type joinToRoom struct {
+	NameRoom string `json:"nameRoom"`
+	Username string `json:"username"`
+}
+
+type HubCommand struct {
+	Command string `json:"command"`
+	Data    string `json:"data"`
+	Author  string `json:"author"`
+}
+
 func (h *Handler) chatRoomWS(c *gin.Context) {
-	roomId := c.Param("roomId")
-	fmt.Println("Room ID", roomId)
+
 	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
 
 	ws, err := upgrader.Upgrade(c.Writer, c.Request, nil)
@@ -106,17 +123,28 @@ func (h *Handler) chatRoomWS(c *gin.Context) {
 
 	log.Println("Client Successfuly Connected...")
 
-	conn := &connection{send: make(chan []byte, 256), ws: ws}
-	s := subscription{conn, roomId}
-	Hb.register <- s
+	conn := &connection{send: make(chan entity.Message), ws: ws}
+	s := session{conn: conn}
+
+	// Send list exist room
+	var existRoom []string
+	for key, _ := range db {
+		existRoom = append(existRoom, key)
+	}
+	ws.WriteJSON(existRoom)
+
+	hubCommand := &HubCommand{}
+	if err = ws.ReadJSON(&hubCommand); err != nil {
+		log.Println(err.Error())
+		return
+	}
+	fmt.Println("Server command: ", hubCommand)
+
+	if hubCommand.Command == join {
+		s.commands = hubCommand
+		Hb.join <- s
+	}
+	//Hb.join <- s
 	go s.writePump()
 	go s.readPump()
-}
-
-func (h *Handler) chatRoom(c *gin.Context) {
-	fmt.Println("chat room")
-	fmt.Println(c.Param("roomdId"))
-
-	//go handleMessages()
-
 }
