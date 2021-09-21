@@ -18,20 +18,11 @@ type session struct {
 	//room string
 }
 
-// hub maintains the set of active connections and broadcasts messages to the
-// connections.
 type hub struct {
-	// Registered connections.
-	rooms map[string]map[*connection]bool
-
-	// Inbound messages from the connections.
+	rooms     map[string]map[*connection]bool
 	broadcast chan entity.Message
-
-	// Register requests from the connections.
-	join chan session
-
-	// Unregister requests from connections.
-	leave chan session
+	join      chan session
+	leave     chan session
 }
 
 var Hb = hub{
@@ -45,7 +36,6 @@ func (h *hub) Run() {
 	for {
 		select {
 		case s := <-h.join:
-			fmt.Println("JOin", s.commands.Data)
 			connections := h.rooms[s.commands.Data]
 			if connections == nil {
 				connections = make(map[*connection]bool)
