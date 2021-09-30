@@ -6,10 +6,11 @@ import (
 	"github.com/vitalik-ez/Chat-Golang/pkg/domain/entity"
 )
 
+/*
 type message struct {
 	data []byte
 	room string
-}
+}*/
 
 type session struct {
 	conn     *connection

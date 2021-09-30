@@ -126,13 +126,6 @@ func (h *Handler) chatRoomWS(c *gin.Context) {
 	conn := &connection{send: make(chan entity.Message), ws: ws}
 	s := session{conn: conn}
 
-	// Send list exist room
-	var existRoom []string
-	for key, _ := range db {
-		existRoom = append(existRoom, key)
-	}
-	ws.WriteJSON(existRoom)
-
 	hubCommand := &HubCommand{}
 	if err = ws.ReadJSON(&hubCommand); err != nil {
 		log.Println(err.Error())

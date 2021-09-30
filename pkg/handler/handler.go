@@ -17,6 +17,7 @@ func (h *Handler) InitRoutes() *gin.Engine {
 
 	router := gin.New()
 
+	router.GET("status-server", h.getStatusServer)
 	{
 		auth := router.Group("/auth")
 		auth.POST("/sign-up", h.signUp)

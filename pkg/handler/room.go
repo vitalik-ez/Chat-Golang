@@ -39,9 +39,16 @@ func (h *Handler) createRoom(c *gin.Context) {
 	c.JSON(http.StatusOK, map[string]interface{}{
 		"id": id,
 	})
+}
 
+type listOfRoom struct {
+	List []string `json:"list" binding:"required"`
 }
 
 func (h *Handler) getAllRooms(c *gin.Context) {
-
+	rooms := listOfRoom{}
+	for room := range db {
+		rooms.List = append(rooms.List, room)
+	}
+	c.JSON(http.StatusOK, rooms)
 }
