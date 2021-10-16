@@ -13,7 +13,7 @@ func NewHandler(services *service.Service) *Handler {
 	return &Handler{services: services}
 }
 
-func (h *Handler) InitRoutes() *gin.Engine {
+func (h *Handler) InitRoutes(hb *hub) *gin.Engine {
 
 	router := gin.New()
 
@@ -25,13 +25,15 @@ func (h *Handler) InitRoutes() *gin.Engine {
 	}
 
 	{
-		api := router.Group("/api", h.userIdentity)
+		api := router.Group("/api") //  ,h.userIdentity
 		room := api.Group("/room")
 		{
 			room.GET("/", h.getAllRooms)
 			room.POST("/", h.createRoom)
 			//room.GET("/:roomId", h.chatRoom)
-			room.GET("/ws/", h.chatRoomWS)
+			room.GET("/ws/", func(c *gin.Context) {
+				h.chatRoomWS(hb, c)
+			})
 		}
 	}
 

@@ -40,13 +40,16 @@ func main() {
 
 	repos := repository.NewRepository(db)
 	services := service.NewService(repos)
+
+	hub := handler.NewHub()
+
 	handlers := handler.NewHandler(services)
 
 	srv := new(server.Server)
 
-	go handler.Hb.Run()
+	go hub.Run()
 
-	if err := srv.Run(viper.GetString("port"), handlers.InitRoutes()); err != nil {
+	if err := srv.Run(viper.GetString("port"), handlers.InitRoutes(hub)); err != nil {
 		logrus.Fatalf("Error occured while running http server", err.Error())
 	}
 

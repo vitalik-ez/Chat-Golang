@@ -2,7 +2,6 @@ package handler
 
 import (
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/vitalik-ez/Chat-Golang/pkg/domain/entity"
@@ -27,15 +26,6 @@ func (h *Handler) createRoom(c *gin.Context) {
 		return
 	}
 
-	// tmp
-	messageTmp := entity.Message{
-		Room:     input.Name,
-		Text:     "Create room",
-		Author:   "default",
-		CreateAt: time.Now(),
-	}
-	db[input.Name] = append(db[input.Name], messageTmp)
-
 	c.JSON(http.StatusOK, map[string]interface{}{
 		"id": id,
 	})
@@ -47,8 +37,8 @@ type listOfRoom struct {
 
 func (h *Handler) getAllRooms(c *gin.Context) {
 	rooms := listOfRoom{}
-	for room := range db {
+	/*for room := range db {
 		rooms.List = append(rooms.List, room)
-	}
+	}*/
 	c.JSON(http.StatusOK, rooms)
 }

@@ -15,6 +15,8 @@ func NewRoomPostgres(db *sqlx.DB) *RoomPostgres {
 	return &RoomPostgres{db: db}
 }
 
+var db = make(map[string][]entity.Message)
+
 func (r *RoomPostgres) Create(userId uint64, room entity.Room) (uint64, error) {
 
 	var exist bool

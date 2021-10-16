@@ -15,13 +15,9 @@ type Room interface {
 	Create(userId uint64, room entity.Room) (uint64, error)
 }
 
-type Message interface {
-}
-
 type Service struct {
 	Authorization
 	Room
-	Message
 }
 
 func NewService(repos *repository.Repository) *Service {
