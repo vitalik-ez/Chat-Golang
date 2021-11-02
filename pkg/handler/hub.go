@@ -47,13 +47,10 @@ func (h *hub) Run() {
 		case m := <-h.Broadcast:
 			message := entity.NewMessage(m.Client.Room, m.Client.UserName, m.Client.Message)
 			connections := h.Rooms[m.Client.Room]
-			// add to tmp db
-			db[m.Client.Room] = append(db[m.Client.Room], message)
 			for c := range connections {
 				if c.WS != m.WS {
 					select {
 					case c.Send <- *message:
-
 					default:
 						close(c.Send)
 						delete(connections, c)

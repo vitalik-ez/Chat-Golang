@@ -1,7 +1,2 @@
-DROP TABLE IF EXISTS users_rooms;
-
 DROP TABLE IF EXISTS messages;
-
-DROP TABLE IF EXISTS users;
-
 DROP TABLE IF EXISTS rooms;

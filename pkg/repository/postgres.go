@@ -9,7 +9,7 @@ import (
 const (
 	usersTable      = "users"
 	messagesTable   = "messages"
-	roomsTAble      = "rooms"
+	roomsTable      = "rooms"
 	usersRoomsTable = "users_rooms"
 )
 

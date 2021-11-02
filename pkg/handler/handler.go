@@ -19,18 +19,9 @@ func (h *Handler) InitRoutes(hb *hub) *gin.Engine {
 
 	router.GET("status-server", h.getStatusServer)
 	{
-		auth := router.Group("/auth")
-		auth.POST("/sign-up", h.signUp)
-		auth.POST("/sign-in", h.signIn)
-	}
-
-	{
 		api := router.Group("/api") //  ,h.userIdentity
 		room := api.Group("/room")
 		{
-			room.GET("/", h.getAllRooms)
-			room.POST("/", h.createRoom)
-			//room.GET("/:roomId", h.chatRoom)
 			room.GET("/ws/", func(c *gin.Context) {
 				h.chatRoomWS(hb, c)
 			})

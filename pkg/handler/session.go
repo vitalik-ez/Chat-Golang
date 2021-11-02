@@ -6,6 +6,7 @@ import (
 
 	"github.com/gorilla/websocket"
 	"github.com/vitalik-ez/Chat-Golang/pkg/domain/entity"
+	"github.com/vitalik-ez/Chat-Golang/pkg/service"
 )
 
 const (
@@ -28,9 +29,9 @@ type Session struct {
 	Client HubCommand
 }
 
-var db = make(map[string][]*entity.Message)
+//var db = make(map[string][]*entity.Message)
 
-func (s Session) readPump(Hb *hub) {
+func (s Session) readPump(Hb *hub, service *service.Service) {
 	defer func() {
 		Hb.Leave <- s
 		s.WS.Close()
@@ -47,8 +48,11 @@ Loop:
 		}
 		switch s.Client.Command {
 		case joinCommand:
+			service.Room.Create(s.Client.Room)
 			Hb.Join <- s
 		case broadcastCommand:
+			message := entity.NewMessage(s.Client.Room, s.Client.UserName, s.Client.Message)
+			service.Message.Create(*message)
 			Hb.Broadcast <- s
 		case leaveCommand:
 			break Loop //Hb.Leave <- s

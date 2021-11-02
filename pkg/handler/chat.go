@@ -29,5 +29,5 @@ func (h *Handler) chatRoomWS(hb *hub, c *gin.Context) {
 	s := Session{Send: make(chan entity.Message), WS: ws}
 
 	go s.writePump(hb)
-	go s.readPump(hb)
+	go s.readPump(hb, h.services)
 }
