@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/vitalik-ez/Chat-Golang/pkg/domain/entity"
 )
@@ -33,7 +33,7 @@ func (h *hub) Run() {
 			}
 			h.Rooms[s.Client.Room][&s] = true
 		case s := <-h.Leave:
-			fmt.Println("Leave client", s.Client)
+			log.Println("Leave client", s.Client)
 			connections := h.Rooms[s.Client.Room]
 			if connections != nil {
 				if _, ok := connections[&s]; ok {
