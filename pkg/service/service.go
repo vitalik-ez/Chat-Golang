@@ -5,6 +5,8 @@ import (
 	"github.com/vitalik-ez/Chat-Golang/pkg/repository"
 )
 
+//go:generate mockgen -source=service.go -destination=mocks/mock.go
+
 type Room interface {
 	Create(room string) error
 }

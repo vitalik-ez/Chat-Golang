@@ -4,7 +4,6 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/vitalik-ez/Chat-Golang/pkg/domain/entity"
 )
@@ -14,17 +13,15 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
-func (h *Handler) chatRoomWS(hb *hub, c *gin.Context) {
+func (h *Handler) chatRoomWS(hb *hub, w http.ResponseWriter, r *http.Request) {
 
 	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
 
-	ws, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+	ws, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err.Error())
 		return
 	}
-
-	log.Println("Client Successfuly Connected...")
 
 	s := Session{Send: make(chan entity.Message), WS: ws}
 

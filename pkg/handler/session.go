@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/gorilla/websocket"
@@ -29,8 +28,6 @@ type Session struct {
 	Client HubCommand
 }
 
-//var db = make(map[string][]*entity.Message)
-
 func (s Session) readPump(Hb *hub, service *service.Service) {
 	defer func() {
 		Hb.Leave <- s
@@ -48,16 +45,20 @@ Loop:
 		}
 		switch s.Client.Command {
 		case joinCommand:
-			service.Room.Create(s.Client.Room)
+			if err = service.Room.Create(s.Client.Room); err != nil {
+				log.Println("Error writing data to database:", err.Error())
+			}
 			Hb.Join <- s
 		case broadcastCommand:
 			message := entity.NewMessage(s.Client.Room, s.Client.UserName, s.Client.Message)
-			service.Message.Create(*message)
+			if err = service.Message.Create(*message); err != nil {
+				log.Println("Error writing data to database:", err.Error())
+			}
 			Hb.Broadcast <- s
 		case leaveCommand:
 			break Loop //Hb.Leave <- s
 		default:
-			fmt.Println("Incorrect coomand !!!")
+			log.Println("Incorrect coomand")
 		}
 	}
 }
@@ -67,9 +68,7 @@ func (s *Session) write(mt int, payload []byte) error {
 }
 
 func (s *Session) writePump(Hb *hub) {
-	//ticker := time.NewTicker(pingPeriod)
 	defer func() {
-		//ticker.Stop()
 		s.WS.Close()
 	}()
 
@@ -77,17 +76,13 @@ func (s *Session) writePump(Hb *hub) {
 		select {
 		case message, ok := <-s.Send:
 			if !ok {
-				fmt.Println("close message", message.Text, ok)
+				log.Println("close message", message.Text, ok)
 				s.write(websocket.CloseMessage, []byte{})
 				return
 			}
 			if err := s.WS.WriteJSON(message); err != nil {
 				return
 			}
-			/*case <-ticker.C:
-			if err := c.write(websocket.PingMessage, []byte{}); err != nil {
-				return
-			}*/
 		}
 	}
 }

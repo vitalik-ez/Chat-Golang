@@ -1,7 +1,9 @@
 package handler
 
 import (
-	"github.com/gin-gonic/gin"
+	"net/http"
+
+	"github.com/gorilla/mux"
 	"github.com/vitalik-ez/Chat-Golang/pkg/service"
 )
 
@@ -13,20 +15,16 @@ func NewHandler(services *service.Service) *Handler {
 	return &Handler{services: services}
 }
 
-func (h *Handler) InitRoutes(hb *hub) *gin.Engine {
+func (h *Handler) InitRoutes(hb *hub) *mux.Router {
+	router := mux.NewRouter()
 
-	router := gin.New()
+	router.HandleFunc("/status-server", func(rw http.ResponseWriter, r *http.Request) {
+		rw.WriteHeader(http.StatusOK)
+	})
 
-	router.GET("status-server", h.getStatusServer)
-	{
-		api := router.Group("/api") //  ,h.userIdentity
-		room := api.Group("/room")
-		{
-			room.GET("/ws/", func(c *gin.Context) {
-				h.chatRoomWS(hb, c)
-			})
-		}
-	}
+	router.HandleFunc("/api/room/ws/", func(rw http.ResponseWriter, r *http.Request) {
+		h.chatRoomWS(hb, rw, r)
+	})
 
 	return router
 }
