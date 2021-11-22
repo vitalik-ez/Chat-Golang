@@ -28,6 +28,13 @@ type Session struct {
 	Client HubCommand
 }
 
+func NewSession(send chan entity.Message, ws *websocket.Conn) *Session {
+	return &Session{
+		Send: send,
+		WS:   ws,
+	}
+}
+
 func (s Session) readPump(Hb *hub, service *service.Service) {
 	defer func() {
 		Hb.Leave <- s

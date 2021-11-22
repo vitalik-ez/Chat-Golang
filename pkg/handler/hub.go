@@ -32,8 +32,8 @@ func (h *hub) Run() {
 				h.Rooms[s.Client.Room] = connections
 			}
 			h.Rooms[s.Client.Room][&s] = true
+			log.Printf("Client %s joined to the %s", s.Client.UserName, s.Client.Room)
 		case s := <-h.Leave:
-			log.Println("Leave client", s.Client)
 			connections := h.Rooms[s.Client.Room]
 			if connections != nil {
 				if _, ok := connections[&s]; ok {
@@ -44,6 +44,7 @@ func (h *hub) Run() {
 					}
 				}
 			}
+			log.Printf("Client %s leave the %s", s.Client.UserName, s.Client.Room)
 		case m := <-h.Broadcast:
 			message := entity.NewMessage(m.Client.Room, m.Client.UserName, m.Client.Message)
 			connections := h.Rooms[m.Client.Room]

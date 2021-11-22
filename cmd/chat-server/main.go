@@ -41,14 +41,14 @@ func main() {
 
 	hub := handler.NewHub()
 
-	handlers := handler.NewHandler(services)
+	handlers := handler.NewHandler(services, hub)
 
 	srv := new(server.Server)
 
 	go hub.Run()
 
-	if err := srv.Run(viper.GetString("port"), handlers.InitRoutes(hub)); err != nil {
-		log.Fatalf("Error occured while running http server", err.Error())
+	if err := srv.Run(viper.GetString("port"), handlers.InitRoutes()); err != nil {
+		log.Fatalf("Error occured while running http server: %v", err.Error())
 	}
 
 }

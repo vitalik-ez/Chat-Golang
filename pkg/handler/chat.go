@@ -13,7 +13,7 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
-func (h *Handler) chatRoomWS(hb *hub, w http.ResponseWriter, r *http.Request) {
+func (h *Handler) chatRoomWS(w http.ResponseWriter, r *http.Request) {
 
 	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
 
@@ -23,8 +23,8 @@ func (h *Handler) chatRoomWS(hb *hub, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s := Session{Send: make(chan entity.Message), WS: ws}
+	s := NewSession(make(chan entity.Message), ws)
 
-	go s.writePump(hb)
-	go s.readPump(hb, h.services)
+	go s.writePump(h.hub)
+	go s.readPump(h.hub, h.services)
 }

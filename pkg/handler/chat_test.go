@@ -20,9 +20,8 @@ func httpToWs(t *testing.T, url string) string {
 func WSServer(t *testing.T, hb *hub, h *Handler) (*httptest.Server, *websocket.Conn) {
 	t.Helper()
 
-	s := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		h.chatRoomWS(hb, rw, r)
-	}))
+	s := httptest.NewServer(http.HandlerFunc(h.chatRoomWS))
+
 	wsURL := httpToWs(t, s.URL)
 	ws, _, err := websocket.DefaultDialer.Dial(wsURL, nil)
 	if err != nil {
@@ -69,9 +68,10 @@ func TestHandler_chatRoomWS(t *testing.T) {
 			testCase.mockBehavior(room, testCase.command.Room)
 
 			services := &service.Service{Room: room}
-			h := NewHandler(services)
 
 			hub := NewHub()
+			h := NewHandler(services, hub)
+
 			s, ws := WSServer(t, hub, h)
 			defer s.Close()
 			defer ws.Close()
